@@ -390,7 +390,11 @@ const mhtml2html = {
 
                     default:
                         if (child.style) {
-                            child.style.cssText = replaceReferences(media, index, child.style.cssText);
+                            let new_css = replaceReferences(media, index, child.style.cssText);
+                            // HACK mikhailp: replace CSS only if it changed - prevent losing
+                            // inline styles because of JSDOM bugs with parsing CSS
+                            if (new_css && new_css!=child.style.cssText)
+                                child.style.cssText = new_css;
                         }
                         break;
                 }

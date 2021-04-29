@@ -1,6 +1,6 @@
 {
-  "name": "mhtml2html",
-  "version": "3.0.0",
+  "name": "@luminati.io/mhtml2html",
+  "version": "3.0.0-lum.0",
   "description": "Converts an mhtml document to a single html document",
   "author": "Mayank Sindwani",
   "license": "MIT",
@@ -17,7 +17,7 @@
   ],
   "main": "dist/mhtml2html.js",
   "bin": {
-    "mhtml2html": "./index.js"
+    "mhtml2html": "index.js"
   },
   "scripts": {
     "lint": "eslint src",
@@ -48,5 +48,11 @@
     "mocha": "^6.2.0",
     "webpack": "^4.39.3",
     "webpack-cli": "^3.3.8"
+  },
+  "bugs": {
+    "url": "https://github.com/msindwan/mhtml2html/issues"
+  },
+  "directories": {
+    "test": "tests"
   }
 }
