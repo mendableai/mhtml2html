@@ -1,5 +1,5 @@
 {
-  "name": "@luminati.io/mhtml2html",
+  "name": "@luminati-io/mhtml2html",
   "version": "3.0.0-lum.0",
   "description": "Converts an mhtml document to a single html document",
   "author": "Mayank Sindwani",
