@@ -1,6 +1,6 @@
 {
   "name": "@luminati-io/mhtml2html",
-  "version": "3.0.0-lum.0",
+  "version": "3.0.0-lum.1",
   "description": "Converts an mhtml document to a single html document",
   "author": "Mayank Sindwani",
   "license": "MIT",
@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "base-64": "^0.1.0",
-    "jsdom": "^15.1.1",
+    "jsdom": "21.1.2",
     "quoted-printable": "^1.0.1",
     "yargs": "^15.1.0"
   },
