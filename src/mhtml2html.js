@@ -86,16 +86,16 @@ function replaceReferences(media, base, asset) {
 }
 
 // Converts the provided asset to a data URI based on the encoding.
-function convertAssetToDataURI(asset) {
-    switch(asset.encoding) {
-        case 'quoted-printable':
-            return `data:${asset.type};utf8,${escape(QuotedPrintable.decode(asset.data))}`;
-        case 'base64':
-            return `data:${asset.type};base64,${asset.data}`;
-        default:
-            return `data:${asset.type};base64,${Base64.encode(asset.data)}`;
-    }
-}
+// function convertAssetToDataURI(asset) {
+//     switch(asset.encoding) {
+//         case 'quoted-printable':
+//             return `data:${asset.type};utf8,${escape(QuotedPrintable.decode(asset.data))}`;
+//         case 'base64':
+//             return `data:${asset.type};base64,${asset.data}`;
+//         default:
+//             return `data:${asset.type};base64,${Base64.encode(asset.data)}`;
+//     }
+// }
 
 // Main module.
 const mhtml2html = {
@@ -228,7 +228,8 @@ const mhtml2html = {
                             encoding : encoding,
                             type : type,
                             data : '',
-                            id : id
+                            id : id,
+                            location : location
                         };
 
                         // Keep track of frames by ID.
@@ -293,7 +294,8 @@ const mhtml2html = {
      */
     convert: (mhtml, { convertIframes = false, parseDOM = defaultDOMParser } = {}) => {
         let index, media, frames;  // Record-keeping.
-        let style, base, img;      // DOM objects.
+        // let style, base, img;      // DOM objects.
+        let base
         let href, src;             // References.
 
         if (typeof mhtml === "string") {
@@ -339,35 +341,35 @@ const mhtml2html = {
                     case 'LINK':
                         if (typeof media[href] !== 'undefined' && media[href].type === 'text/css') {
                             // Embed the css into the document.
-                            style = documentElem.createElement('style');
-                            style.type = 'text/css';
-                            media[href].data = replaceReferences(media, href, media[href].data);
-                            style.appendChild(documentElem.createTextNode(media[href].data));
-                            childNode.replaceChild(style, child);
+                            // style = documentElem.createElement('style');
+                            // style.type = 'text/css';
+                            // media[href].data = replaceReferences(media, href, media[href].data);
+                            // style.appendChild(documentElem.createTextNode(media[href].data));
+                            // childNode.replaceChild(style, child);
                         }
                         break;
 
                     case 'STYLE':
-                        style = documentElem.createElement('style');
-                        style.type = 'text/css';
-                        style.appendChild(documentElem.createTextNode(replaceReferences(media, index, child.innerHTML)));
-                        childNode.replaceChild(style, child);
+                        // style = documentElem.createElement('style');
+                        // style.type = 'text/css';
+                        // style.appendChild(documentElem.createTextNode(replaceReferences(media, index, child.innerHTML)));
+                        // childNode.replaceChild(style, child);
                         break;
 
                     case 'IMG':
-                        img = null;
-                        if (typeof media[src] !== 'undefined' && media[src].type.includes('image')) {
-                            // Embed the image into the document.
-                            try {
-                                img = convertAssetToDataURI(media[src]);
-                            } catch(e) {
-                                console.warn(e);
-                            }
-                            if (img !== null) {
-                                child.setAttribute('src', img);
-                            }
-                        }
-                        child.style.cssText = replaceReferences(media, index, child.style.cssText);
+                        // img = null;
+                        // if (typeof media[src] !== 'undefined' && media[src].type.includes('image')) {
+                        //     // Embed the image into the document.
+                        //     try {
+                        //         img = convertAssetToDataURI(media[src]);
+                        //     } catch(e) {
+                        //         console.warn(e);
+                        //     }
+                        //     if (img !== null) {
+                        //         child.setAttribute('src', img);
+                        //     }
+                        // }
+                        // child.style.cssText = replaceReferences(media, index, child.style.cssText);
                         break;
 
                     case 'IFRAME':
@@ -384,10 +386,13 @@ const mhtml2html = {
                                 child.src = `data:text/html;charset=utf-8,${encodeURIComponent(
                                     iframe.window.document.documentElement.outerHTML
                                 )}`;
+
+                                if (frame.location) {
+                                    child.setAttribute('original-src', frame.location);
+                                }
                             }
                         }
                         break;
-
                     default:
                         if (child.style) {
                             let new_css = replaceReferences(media, index, child.style.cssText);
