@@ -295,7 +295,7 @@ const mhtml2html = {
     convert: (mhtml, { convertIframes = false, parseDOM = defaultDOMParser } = {}) => {
         let index, media, frames;  // Record-keeping.
         // let style, base, img;      // DOM objects.
-        let base
+        let base;
         let href, src;             // References.
 
         if (typeof mhtml === "string") {
