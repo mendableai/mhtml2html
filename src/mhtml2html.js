@@ -374,21 +374,38 @@ const mhtml2html = {
 
                     case 'IFRAME':
                         if (convertIframes === true && src) {
-                            const id = `<${src.split('cid:')[1]}>`;
-                            const frame = frames[id];
+                            const cidMatch = src.match(/^cid:(.*)$/);
+                            if (cidMatch && cidMatch[1]) {
+                                const id = `<${cidMatch[1]}>`;
+                                const frame = frames[id];
 
-                            if (frame && frame.type === 'text/html') {
-                                const iframe = mhtml2html.convert({
-                                    media: Object.assign({}, media, { [id] : frame }),
-                                    frames: frames,
-                                    index: id,
-                                }, { convertIframes, parseDOM });
-                                child.src = `data:text/html;charset=utf-8,${encodeURIComponent(
-                                    iframe.window.document.documentElement.outerHTML
-                                )}`;
+                                if (frame && frame.type === 'text/html') {
+                                    const iframeContent = mhtml2html.convert({
+                                        media: Object.assign({}, media, { [id] : frame }),
+                                        frames: frames,
+                                        index: id,
+                                    }, { convertIframes, parseDOM });
 
-                                if (frame.location) {
-                                    child.setAttribute('original-src', frame.location);
+                                    // Create a div element to replace the iframe
+                                    const div = documentElem.createElement('div');
+
+                                    // Copy all attributes from the iframe to the div
+                                    Array.from(child.attributes).forEach(attr => {
+                                        div.setAttribute(attr.name, attr.value);
+                                    });
+
+                                    if (frame.location) {
+                                        div.setAttribute('src', frame.location);
+                                    }
+
+                                    // Add an extra attribute to specify it was an iframe
+                                    div.setAttribute('data-original-tag', 'iframe');
+
+                                    // Insert the iframe's HTML inside the div
+                                    div.innerHTML = iframeContent.window.document.documentElement.outerHTML;
+
+                                    // Replace the iframe with the div
+                                    childNode.replaceChild(div, child);
                                 }
                             }
                         }
@@ -398,7 +415,7 @@ const mhtml2html = {
                             let new_css = replaceReferences(media, index, child.style.cssText);
                             // HACK mikhailp: replace CSS only if it changed - prevent losing
                             // inline styles because of JSDOM bugs with parsing CSS
-                            if (new_css && new_css!=child.style.cssText)
+                            if (new_css && new_css != child.style.cssText)
                                 child.style.cssText = new_css;
                         }
                         break;
