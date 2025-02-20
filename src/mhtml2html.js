@@ -385,15 +385,50 @@ const mhtml2html = {
           case "FRAMESET":
             const div = documentElem.createElement("div");
 
+            // Copy over the frame layout (cols, rows)
             Array.from(child.attributes).forEach((attr) => {
               div.setAttribute(attr.name, attr.value);
             });
 
             div.setAttribute("data-original-tag", "frameset");
 
-            // Copy the inner HTML
-            div.innerHTML = child.innerHTML;
+            // Now loop over each <FRAME> inside the <FRAMESET>
+            Array.from(child.childNodes).forEach((frame) => {
+              if (frame.tagName === "FRAME") {
+                const frameSrc = frame.getAttribute("src");
+                const cidMatch = frameSrc.match(/^cid:(.*)$/);
 
+                if (cidMatch && cidMatch[1]) {
+                  const id = `<${cidMatch[1]}>`;
+                  const frameContent = frames[id];
+
+                  if (frameContent && frameContent.type === "text/html") {
+                    // Recursively convert the content of the frame
+                    const iframeContent = mhtml2html.convert(
+                      {
+                        media: Object.assign({}, media, { [id]: frameContent }),
+                        frames: frames,
+                        index: id,
+                      },
+                      { convertIframes, parseDOM }
+                    );
+
+                    // Create a div to replace the <FRAME>
+                    const frameDiv = documentElem.createElement("div");
+                    Array.from(frame.attributes).forEach((attr) => {
+                      frameDiv.setAttribute(attr.name, attr.value);
+                    });
+
+                    frameDiv.innerHTML =
+                      iframeContent.window.document.documentElement.outerHTML;
+
+                    div.appendChild(frameDiv); // Append the content as a div inside the FRAMESET
+                  }
+                }
+              }
+            });
+
+            // Replace the FRAMESET with the created div
             childNode.replaceChild(div, child);
             break;
 
