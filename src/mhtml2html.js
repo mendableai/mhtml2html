@@ -382,6 +382,21 @@ const mhtml2html = {
             child.insertBefore(base, child.firstChild);
             break;
 
+          case "FRAMESET":
+            const div = documentElem.createElement("div");
+
+            Array.from(child.attributes).forEach((attr) => {
+              div.setAttribute(attr.name, attr.value);
+            });
+
+            div.setAttribute("data-original-tag", "frameset");
+
+            // Copy the inner HTML
+            div.innerHTML = child.innerHTML;
+
+            childNode.replaceChild(div, child);
+            break;
+
           case "LINK":
             if (
               typeof media[href] !== "undefined" &&
